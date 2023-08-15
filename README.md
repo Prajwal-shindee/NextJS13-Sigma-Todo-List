@@ -1,6 +1,5 @@
-# NextJS13-Sigma-Todo-List
-
-Structure
+## Structure
+```
 ├── components/
 │   ├── EntryForm.jsx
 │   ├── Nav.jsx
@@ -52,43 +51,55 @@ Structure
 └── styles/
     ├── globals.css
     └── tailwind.css
-Credential authentication with next-auth
-Database
-npm i mongoose next-auth next-connect validator bcrypt
-Create a user model with mongoose
-Create dbConnect()
-Backend
-Set up endpoints: api/auth/register.js and _api/auth/[...nextauth].js
-Create (API route) handler with next-connect @/utils/handler.js
-Use handler to create register.js for new user api/auth/register.js
-@[...nextauth].js : create a NextAuth function includes:
-session: Enable JSON Web Tokens
-providers: use SSO or credentials(email and password)
-callback: Add a customized accessToken and user info
-pages: '/entry'
-Frontend:
-import {useSession} from "next-auth/react" on todosPage and homePage
-Use useSession() hook to extract user.name, then pass to as a props.
-Save accessToken to localStorage. //***Todo: Optimized later with refreshToken saved to cookies
-GET/PATCH/POST/DELETT/UPDATE todos with token
-On client-side, and add accessToken to headers: { 'Authorization': accessToken} GET/PATCH/POST/DELETT/UPDATE
-On server-side:
-create api/auth/middlewares/requireAtth.js
-extract token from the header:
-    const authorizationHeader =
-    req.headers instanceof Headers
-      ? req.headers.get('authorization')
-      : req.headers.authorization
-  let token = authorizationHeader?.split(' ')[1];
-Decode the token
-const decodedToken = verify(token, secretKey);
-extract user._id and add to req
-req.user = decodedToken.sub;
-NOTE: cannot get the [id] from url. For now use this way
-const url = new URL(req.url, `http://${req.headers.host}`);
-const id = url.pathname.split('/').pop();
-Create a simple modal to addNote
-Add the "note" field to your MongoDB model:
+```
+## Credential authentication with next-auth
+#### Database
+1. npm i mongoose next-auth next-connect validator bcrypt
+2. Create a user model with mongoose
+3. Create dbConnect()
+#### Backend
+1. Set up endpoints: _api/auth/register.js_ and _api/auth/[...nextauth].js 
+2. Create (API route) handler with next-connect @/utils/handler.js 
+3. Use handler to create register.js for new user api/auth/register.js
+4. @[...nextauth].js : create a NextAuth function includes: 
+   - session: Enable JSON Web Tokens
+   - providers: use SSO or credentials(email and password)
+   - callback: Add a customized accessToken and user info
+   - pages: '/entry'
+#### Frontend:
+1. import {useSession} from "next-auth/react" on todosPage and homePage
+2. Use useSession() hook to extract user.name, then pass to <Nav/> as a props.
+3. Save accessToken to localStorage. //***Todo: Optimized later with refreshToken saved to cookies
+
+## GET/PATCH/POST/DELETT/UPDATE todos with token
+1. On client-side, and add accessToken to `headers: { 'Authorization': accessToken}` GET/PATCH/POST/DELETT/UPDATE 
+2. On server-side:
+    - create api/auth/middlewares/requireAtth.js
+    - extract token from the header:
+    ```js
+        const authorizationHeader =
+        req.headers instanceof Headers
+          ? req.headers.get('authorization')
+          : req.headers.authorization
+      let token = authorizationHeader?.split(' ')[1];
+    ```
+    - Decode the token
+    ```js
+    const decodedToken = verify(token, secretKey);
+    ```
+    - extract user._id and add to req
+    ```js
+    req.user = decodedToken.sub;
+    ```
+    - NOTE: cannot get the [id] from url. For now use this way
+    ```js
+    const url = new URL(req.url, `http://${req.headers.host}`);
+    const id = url.pathname.split('/').pop();
+    ```
+## Create a simple modal to addNote
+1. Add the "note" field to your MongoDB model:
+
+```js
 import { Schema, model, models }  from 'mongoose';
 
 const TodoSchema = new Schema({
@@ -102,7 +113,11 @@ const TodoSchema = new Schema({
 
 const Todo = models.Todo || model('Todo', TodoSchema);
 export default Todo;
-For the PATCH request in the api/todos/[id]/route.js file, include the "note" field:
+```
+
+- For the `PATCH` request in the `api/todos/[id]/route.js` file, include the "note" field:
+
+```js
 export const PATCH = requireAuth(async(req ) => {
  const { title, priority , completed, note } = await req.json() //added note here
     //...existing fields
@@ -120,14 +135,22 @@ export const PATCH = requireAuth(async(req ) => {
 
  }
 })
-Use the browser's built-in prompt function:
+```
+
+- Use the browser's built-in prompt function:
+
+```javascript
 const handleNote = (id) => {
  let note = prompt("Please enter your note:"); // shows a simple input popup
  if (note != null) {
    onAddNote(id, note); // calls function to save note
  }
 }
-Add onAddNote function
+```
+
+- Add onAddNote function
+
+```javascript
 const onAddNote = (id, note) => {
  fetch(`/api/todos/${id}`, {
    method: 'PATCH',
@@ -144,8 +167,9 @@ const onAddNote = (id, note) => {
    console.error('Error:', error);
  });
 }
-Create a sticker note
-Database
-Create a demo database on MongoAtlas
-Connect MongoAtlas with MongoCompass
-Use MongoCompass to add Demo data
+```
+## Create a sticker note 
+## Database
+- Create a demo database on MongoAtlas
+- Connect MongoAtlas with MongoCompass
+- Use MongoCompass to add Demo data
